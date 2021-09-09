@@ -4,9 +4,18 @@ using UnityEngine;
 
 public class CamaraControl : MonoBehaviour
 {
-    public Camera cam;
+    public Camera Cam;
+    public float ZoomStep = 1;
+    public float MinCamSize = 1.0f;
+    public float MaxCamSize = 20.0f;
+    public float SmoothSpeed = 15.0f;
+    public float mapMinX = -50.0f;
+    public float mapMaxX = 50.0f;
+    public float mapMinY = -50.0f;
+    public float mapMaxY = 50.0f;
 
     private Vector3 dragOrigin;
+    private float targetOrtho = 13.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -18,19 +27,54 @@ public class CamaraControl : MonoBehaviour
     void Update()
     {
         PanCamera();
+        Zoom();
     }
 
     void PanCamera()
     {
         if(Input.GetMouseButtonDown(0))
         {
-            dragOrigin = cam.ScreenToWorldPoint(Input.mousePosition);
+            dragOrigin = Cam.ScreenToWorldPoint(Input.mousePosition);
         }
 
         if(Input.GetMouseButton(0))
         {
-            Vector3 difference = dragOrigin - cam.ScreenToWorldPoint(Input.mousePosition);
-            cam.transform.position += difference;
+            Vector3 difference = dragOrigin - Cam.ScreenToWorldPoint(Input.mousePosition);
+            Cam.transform.position += difference;
         }
+
+        ClampCamera(Cam.transform.position);
+    }
+
+    void Zoom()
+    {
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+
+        if (scroll != 0.0f)
+        {
+            targetOrtho -= scroll * ZoomStep;
+            targetOrtho = Mathf.Clamp(targetOrtho, MinCamSize, MaxCamSize);
+        }
+
+        Cam.orthographicSize = Mathf.MoveTowards(Cam.orthographicSize, targetOrtho, SmoothSpeed * Time.deltaTime);
+
+        ClampCamera(Cam.transform.position);
+    }
+
+    void ClampCamera(Vector3 targetposition)
+    {
+        float camHeight = Cam.orthographicSize;
+        float camWidth = Cam.orthographicSize * Cam.aspect;
+
+        float minX = mapMinX + camWidth;
+        float minY = mapMinY + camHeight;
+
+        float maxX = mapMaxX - camWidth;
+        float maxY = mapMaxY - camHeight;
+
+        float newX = Mathf.Clamp(targetposition.x, minX, maxX);
+        float newY = Mathf.Clamp(targetposition.y, minY, maxY);
+
+        Cam.transform.position = new Vector3(newX, newY, -10);
     }
 }
