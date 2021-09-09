@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class CamaraControl : MonoBehaviour
 {
@@ -34,13 +35,19 @@ public class CamaraControl : MonoBehaviour
     {
         if(Input.GetMouseButtonDown(0))
         {
-            dragOrigin = Cam.ScreenToWorldPoint(Input.mousePosition);
+            if(!EventSystem.current.IsPointerOverGameObject()) //UI 클릭시 false
+                {
+                    dragOrigin = Cam.ScreenToWorldPoint(Input.mousePosition);
+                }
         }
 
         if(Input.GetMouseButton(0))
         {
-            Vector3 difference = dragOrigin - Cam.ScreenToWorldPoint(Input.mousePosition);
-            Cam.transform.position += difference;
+            if (!EventSystem.current.IsPointerOverGameObject())
+            {
+                Vector3 difference = dragOrigin - Cam.ScreenToWorldPoint(Input.mousePosition);
+                Cam.transform.position += difference;
+            }
         }
 
         ClampCamera(Cam.transform.position);

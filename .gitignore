@@ -11,6 +11,8 @@ Obj/
 UnityGenerated/
  
 Library/
+
+Logs/
  
  
  
@@ -69,3 +71,4 @@ GraphicsSettings.asset
 ProjectSettings.asset
  
 ProjectVersion.txt
+*.log
