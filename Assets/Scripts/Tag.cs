@@ -165,7 +165,8 @@ public class Tag : MonoBehaviour
 
     void TagInstantiate()
     {
-        foreach (KeyValuePair<string, TagStruct> item in TagDict)
+        Dictionary<string, TagStruct> TempTagDict = new Dictionary<string, TagStruct>(TagDict);
+        foreach (KeyValuePair<string, TagStruct> item in TempTagDict)
         {
             //Debug.LogFormat("{0}:, {1}, {2}, {3}", item.Key, float.Parse(item.Value["smoothedPosition"][0].ToString()), float.Parse(item.Value["smoothedPosition"][1].ToString()), float.Parse(item.Value["smoothedPosition"][2].ToString()));
             Vector3 tagPosition = item.Value.smoothedPosition;
@@ -200,11 +201,12 @@ public class Tag : MonoBehaviour
     // Tag position 정보가 1분간 갱신 안되면 화면에서 지우기 위한 함수
     IEnumerator TagDelete()
     {
+        Dictionary<string, TagStruct> TempTagDictt = new Dictionary<string, TagStruct>(TagDict);
         Debug.Log("5sec");
         DateTime currentTime = DateTime.Now;
         DateTime oneMinBefore = currentTime.AddMinutes(-1);
         string ttttime = oneMinBefore.ToString("HH mm ss");
-        foreach (KeyValuePair<string, TagStruct> item in TagDict)
+        foreach (KeyValuePair<string, TagStruct> item in TempTagDictt)
         {
             int gap = DateTime.Compare(item.Value.LastTime, oneMinBefore);
             if (gap < 0)
