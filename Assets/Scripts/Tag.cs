@@ -17,10 +17,14 @@ public class Tag : MonoBehaviour
     [Range(0f, 1f)]
     public float TagSize = 0.2f;
 
-    Dictionary<string, DateTime> TagTimeTable = new Dictionary<string, DateTime>();
     Dictionary<string, TagStruct> TagDict = new Dictionary<string, TagStruct>();
 
-    List<string> TagList;  //List를 화면에 expanable list화 할 때 
+    List<string> TagList = new List<string>();  //List를 화면에 expanable list화 할 때
+
+    string[] CoordArray;
+    List<string> CoordList;
+    public string coordsystem = "TempA";
+    public string coordsystemTemp = "TempB";
 
     struct TagStruct
     {
@@ -41,7 +45,7 @@ public class Tag : MonoBehaviour
     void Awake()
     {
         //TagInstantiate();
-        StartCoroutine(LoadData(APITimer));
+        StartCoroutine(GetCoordSys());
         StartCoroutine(TagDelete());
     }
 
@@ -50,11 +54,75 @@ public class Tag : MonoBehaviour
         TagSizeChange();
     }
 
+    IEnumerator GetCoordSys()
+    {
+        string jsonResult;
+        string GetDataUrl = "http://192.168.30.39:8080/qpe/getProjectInfo?version=2&noImageBytes=true";
+        CoordList = new List<string>();
+        using (UnityWebRequest www = UnityWebRequest.Get(GetDataUrl))
+        {
+            yield return www.SendWebRequest();
+            if (www.result != UnityWebRequest.Result.Success) //불러오기 실패 시
+            {
+                Debug.Log(www.error);
+                yield break;
+            }
+            else
+            {
+                if (www.isDone) //호출 완료 시
+                {
+                    jsonResult = System.Text.Encoding.UTF8.GetString(www.downloadHandler.data); //byte를 string으로
+                    if (jsonResult == "")
+                    {
+                        Debug.Log("Tag Info API Result is empty");
+                    }
+
+                    JsonData projectInfo = JsonMapper.ToObject(jsonResult);
+                    projectInfo = projectInfo["coordinateSystems"];
+                    for (int i = 0; i < projectInfo.Count; i++)
+                    {
+                        string CoordID;
+                        if (projectInfo[i]["name"].ToString() != "")
+                        {
+                            CoordID = projectInfo[i]["name"].ToString();
+                        }
+                        else
+                        {
+                            CoordID = projectInfo[i]["id"].ToString();
+                        }
+                        CoordList.Add(CoordID);
+                    }
+                    CoordArray = CoordList.ToArray();
+                    coordsystem = CoordArray[0];
+                    print("LoadData");
+                    StartCoroutine(LoadData(APITimer));
+                }
+            }
+        }
+    }
+
+
     //API Get Tag Info
     IEnumerator LoadData(float delayTime)
     {
+        // 맵 바뀔 시
+        if (coordsystemTemp != coordsystem)
+        {
+            TagDict.Clear();
+            TagList.Clear();
+
+            // tag 모두 삭제
+            int childs = transform.childCount;
+            for (int i = childs - 1; i >= 0; i--)
+            {
+                GameObject.Destroy(transform.GetChild(i).gameObject);
+            }
+
+        }
+        coordsystemTemp = coordsystem;
         string jsonResult;
-        string GetDataUrl = "http://192.168.30.39:8080/qpe/getTagPosition?version=2&coord=5a674eaf-3426-4db3-94d6-c2f96f572122&maxAge=10000";
+        string GetDataUrl = string.Format("http://192.168.30.39:8080/qpe/getTagPosition?version=2&coord={0}&maxAge=10000", coordsystemTemp);
+        //string GetDataUrl = "http://192.168.30.39:8080/qpe/getTagPosition?version=2&coord=5a674eaf-3426-4db3-94d6-c2f96f572122&maxAge=10000";
         using (UnityWebRequest www = UnityWebRequest.Get(GetDataUrl))
         {
             yield return www.SendWebRequest();
@@ -96,7 +164,6 @@ public class Tag : MonoBehaviour
 
 
         string TagID;
-        TagList = new List<string>();
 
         for (int i = 0; i < TagInfo["tags"].Count; i++)
         {
@@ -126,38 +193,13 @@ public class Tag : MonoBehaviour
             if (!TagDict.ContainsKey(TagID))
             {
                 TagDict.Add(TagID, TagPositionInfo);
-            } else
+            }
+            else
             {
                 TagDict[TagID] = TagPositionInfo;
             }
             TagList.Add(TagID);
         }
-        
-
-        //for (int i = 0; i < TagInfo["tags"].Count; i++)
-        //{
-        //    if (TagInfo["tags"][i]["name"] != null)
-        //    {
-        //        TagID = TagInfo["tags"][i]["name"].ToString();
-        //    }
-        //    else
-        //    {
-        //        TagID = TagInfo["tags"][i]["id"].ToString();
-        //    }
-        //
-        //    TagDict.Add(TagID, TagInfo["tags"][i]);
-        //    TagList.Add(TagID);
-        //}
-        //foreach(string myName in TagList)
-        //{
-        //    Debug.Log(myName);
-        //}
-        //if (TagArray != null)
-        //{
-        //    Array.Clear(TagArray, 0, TagArray.Length);
-        //}
-        //TagArray = TagList.ToArray();
-        //Dictionary<string, JsonData> TagResponse = TagDict;
 
         TagInstantiate();
     }
@@ -171,13 +213,14 @@ public class Tag : MonoBehaviour
             //Debug.LogFormat("{0}:, {1}, {2}, {3}", item.Key, float.Parse(item.Value["smoothedPosition"][0].ToString()), float.Parse(item.Value["smoothedPosition"][1].ToString()), float.Parse(item.Value["smoothedPosition"][2].ToString()));
             Vector3 tagPosition = item.Value.smoothedPosition;
             if (null != GameObject.Find(item.Key))
-            { 
+            {
                 GameObject tagg = GameObject.Find(item.Key);
                 tagg.GetComponent<Transform>().position = tagPosition;
 
                 //Debug.Log("GOT CHAA");
 
-            } else
+            }
+            else
             {
                 GameObject tag = Instantiate(prefab, tagPosition, Quaternion.identity);
                 tag.transform.parent = transform;
@@ -211,7 +254,7 @@ public class Tag : MonoBehaviour
             int gap = DateTime.Compare(item.Value.LastTime, oneMinBefore);
             if (gap < 0)
             {
-                string tttime = item.Value.LastTime.ToString("HH mm ss"); 
+                string tttime = item.Value.LastTime.ToString("HH mm ss");
                 Debug.LogFormat("{0} is removed due to one minute timeout. {1} {2}", item.Value.name, item.Value.positionTS, tttime, ttttime);
                 TagDict.Remove(item.Key);
                 GameObject tagg = GameObject.Find(item.Key);
@@ -220,5 +263,11 @@ public class Tag : MonoBehaviour
         }
         yield return new WaitForSeconds(5);
         StartCoroutine(TagDelete());
+    }
+
+    // CoordSystem change, 층 전환
+    public void CoordChange(int index)
+    {
+        coordsystem = CoordArray[index];
     }
 }
