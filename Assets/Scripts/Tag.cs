@@ -4,6 +4,7 @@ using UnityEngine;
 using LitJson;
 using UnityEngine.Networking;
 using System;
+using System.Threading;
 
 public class Tag : MonoBehaviour
 {
@@ -17,8 +18,9 @@ public class Tag : MonoBehaviour
     [Range(0f, 1f)]
     public float TagSize = 0.2f;
 
-    Dictionary<string, TagStruct> TagDict = new Dictionary<string, TagStruct>();
-
+    //Dictionary<string, TagStruct> TagDict = new Dictionary<string, TagStruct>();
+    Dictionary<string, Dictionary<string, TagStruct>> CoordTagDict = new Dictionary<string, Dictionary<string, TagStruct>>();  //CoordSys와 Tag정보를 모두 담는 Dict
+    Dictionary<string, TagStruct> tempDict = new Dictionary<string, TagStruct>();
     List<string> TagList = new List<string>();  //List를 화면에 expanable list화 할 때
 
     string[] CoordArray;
@@ -46,6 +48,11 @@ public class Tag : MonoBehaviour
     {
         //TagInstantiate();
         StartCoroutine(GetCoordSys());
+    }
+
+    private void Start()
+    {
+        Thread.Sleep(2000);
         StartCoroutine(TagDelete());
     }
 
@@ -94,6 +101,10 @@ public class Tag : MonoBehaviour
                     }
                     CoordArray = CoordList.ToArray();
                     coordsystem = CoordArray[0];
+                    for (int i = 0; i < CoordArray.Length; i++)
+                    {
+                        CoordTagDict.Add(CoordArray[i], new Dictionary<string, TagStruct>());
+                    }
                     print("LoadData");
                     StartCoroutine(LoadData(APITimer));
                 }
@@ -108,7 +119,7 @@ public class Tag : MonoBehaviour
         // 맵 바뀔 시
         if (coordsystemTemp != coordsystem)
         {
-            TagDict.Clear();
+            //TagDict.Clear();
             TagList.Clear();
 
             // tag 모두 삭제
@@ -121,8 +132,8 @@ public class Tag : MonoBehaviour
         }
         coordsystemTemp = coordsystem;
         string jsonResult;
-        string GetDataUrl = string.Format("http://192.168.30.39:8080/qpe/getTagPosition?version=2&coord={0}&maxAge=10000", coordsystemTemp);
-        //string GetDataUrl = "http://192.168.30.39:8080/qpe/getTagPosition?version=2&coord=5a674eaf-3426-4db3-94d6-c2f96f572122&maxAge=10000";
+        string GetDataUrl = string.Format("http://192.168.30.39:8080/qpe/getTagPosition?version=2&maxAge=80000");
+        //string GetDataUrl = string.Format("http://192.168.30.39:8080/qpe/getTagPosition?version=2&coord={0}&maxAge=80000",coordsystemTemp);
         using (UnityWebRequest www = UnityWebRequest.Get(GetDataUrl))
         {
             yield return www.SendWebRequest();
@@ -152,7 +163,8 @@ public class Tag : MonoBehaviour
     public void InitData(string jsonResult)
     {
         JsonData TagInfo;
-        //Dictionary<string, JsonData> TagDict = new Dictionary<string, JsonData>();
+
+        Dictionary<string, TagStruct> TagDict = new Dictionary<string, TagStruct>();
 
         if (jsonResult == "")
         {
@@ -162,6 +174,7 @@ public class Tag : MonoBehaviour
         TagInfo = JsonMapper.ToObject(jsonResult);
         //Debug.Log(TagInfo.Count);
 
+        //string coordSysName = TagInfo["tags"][0]["coordinateSystemName"].ToString();
 
         string TagID;
 
@@ -190,24 +203,40 @@ public class Tag : MonoBehaviour
             TagPositionInfo.zones = TagInfo["tags"][i]["zones"].ToString();
             TagPositionInfo.LastTime = NowTime;
             TagPositionInfo.positionTS = long.Parse(TagInfo["tags"][i]["positionTS"].ToString());
-            if (!TagDict.ContainsKey(TagID))
+
+            foreach (string item in CoordArray)
             {
-                TagDict.Add(TagID, TagPositionInfo);
+                if (CoordTagDict[item].ContainsKey(TagID))
+                {
+                    if (item != TagPositionInfo.coordinateSystemName)
+                    {
+                        CoordTagDict[item].Remove(TagID);
+
+                        if (null != GameObject.Find(TagID))
+                        {
+                            Destroy(GameObject.Find(TagID));
+                        }
+                    }
+                }
+            }
+
+            if (!CoordTagDict[TagPositionInfo.coordinateSystemName].ContainsKey(TagID))
+            {
+                CoordTagDict[TagPositionInfo.coordinateSystemName].Add(TagID, TagPositionInfo);
             }
             else
             {
-                TagDict[TagID] = TagPositionInfo;
+                CoordTagDict[TagPositionInfo.coordinateSystemName][TagID] = TagPositionInfo;
             }
-            TagList.Add(TagID);
         }
-
+            
         TagInstantiate();
     }
 
 
     void TagInstantiate()
     {
-        Dictionary<string, TagStruct> TempTagDict = new Dictionary<string, TagStruct>(TagDict);
+        Dictionary<string, TagStruct> TempTagDict = new Dictionary<string, TagStruct>(CoordTagDict[coordsystem]);
         foreach (KeyValuePair<string, TagStruct> item in TempTagDict)
         {
             //Debug.LogFormat("{0}:, {1}, {2}, {3}", item.Key, float.Parse(item.Value["smoothedPosition"][0].ToString()), float.Parse(item.Value["smoothedPosition"][1].ToString()), float.Parse(item.Value["smoothedPosition"][2].ToString()));
@@ -244,7 +273,7 @@ public class Tag : MonoBehaviour
     // Tag position 정보가 1분간 갱신 안되면 화면에서 지우기 위한 함수
     IEnumerator TagDelete()
     {
-        Dictionary<string, TagStruct> TempTagDictt = new Dictionary<string, TagStruct>(TagDict);
+        Dictionary<string, TagStruct> TempTagDictt = new Dictionary<string, TagStruct>(CoordTagDict[coordsystem]);
         Debug.Log("5sec");
         DateTime currentTime = DateTime.Now;
         DateTime oneMinBefore = currentTime.AddMinutes(-1);
@@ -256,7 +285,7 @@ public class Tag : MonoBehaviour
             {
                 string tttime = item.Value.LastTime.ToString("HH mm ss");
                 Debug.LogFormat("{0} is removed due to one minute timeout. {1} {2}", item.Value.name, item.Value.positionTS, tttime, ttttime);
-                TagDict.Remove(item.Key);
+                CoordTagDict[coordsystem].Remove(item.Key);
                 GameObject tagg = GameObject.Find(item.Key);
                 Destroy(tagg);
             }

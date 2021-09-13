@@ -138,8 +138,7 @@ public class RestAPI : MonoBehaviour
     }
 
     public void DropdownSelect(int index)
-    {
-        Debug.Log(index);    
+    {   
         JsonData BackgroundResponse = CoordsysDict[CoordArray[index]]["backgroundImages"][0];
         LoadBackgroundImage(BackgroundResponse);
     }
