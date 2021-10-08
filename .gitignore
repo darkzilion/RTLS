@@ -75,3 +75,16 @@ ProjectSettings.asset
 ProjectVersion.txt
 
 *.log
+Logs/shadercompiler-UnityShaderCompiler0.log
+*.log
+Logs/AssetImportWorker0-prev.log
+Logs/ApiUpdaterCheck.txt
+Logs/AssetImportWorker0-prev.log
+Logs/AssetImportWorker0.log
+Logs/AssetImportWorker1.log
+Logs/shadercompiler-UnityShaderCompiler0.log
+Logs/shadercompiler-UnityShaderCompiler14.log
+Logs/shadercompiler-UnityShaderCompiler2.log
+Logs/shadercompiler-UnityShaderCompiler4.log
+Logs/AssetImportWorker1.log
+Logs/AssetImportWorker0.log

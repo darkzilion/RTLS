@@ -26,7 +26,7 @@ public class RestAPI : MonoBehaviour
     //API Get Project Info
     IEnumerator LoadData()
     {
-        string GetDataUrl = "http://192.168.30.39:8080/qpe/getProjectInfo?version=2";
+        string GetDataUrl = "http://172.100.100.170:8080/qpe/getProjectInfo?version=2";
         using (UnityWebRequest www = UnityWebRequest.Get(GetDataUrl))
         {
             yield return www.SendWebRequest();

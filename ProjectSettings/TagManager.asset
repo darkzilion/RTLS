@@ -16,7 +16,7 @@ TagManager:
   - 
   - 
   - Tags
-  - 
+  - Zones
   - 
   - 
   - 
@@ -38,9 +38,12 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
   - name: Tags
     uniqueID: 1793175721
     locked: 0
-  - name: Default
-    uniqueID: 0
+  - name: Zones
+    uniqueID: 1324565773
     locked: 0

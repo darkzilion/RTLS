@@ -64,7 +64,7 @@ public class Tag : MonoBehaviour
     IEnumerator GetCoordSys()
     {
         string jsonResult;
-        string GetDataUrl = "http://192.168.30.39:8080/qpe/getProjectInfo?version=2&noImageBytes=true";
+        string GetDataUrl = "http://172.100.100.170:8080/qpe/getProjectInfo?version=2&noImageBytes=true";
         CoordList = new List<string>();
         using (UnityWebRequest www = UnityWebRequest.Get(GetDataUrl))
         {
@@ -132,8 +132,8 @@ public class Tag : MonoBehaviour
         }
         coordsystemTemp = coordsystem;
         string jsonResult;
-        string GetDataUrl = string.Format("http://192.168.30.39:8080/qpe/getTagPosition?version=2&maxAge=80000");
-        //string GetDataUrl = string.Format("http://192.168.30.39:8080/qpe/getTagPosition?version=2&coord={0}&maxAge=80000",coordsystemTemp);
+        string GetDataUrl = string.Format("http://172.100.100.170:8080/qpe/getTagPosition?version=2&maxAge=80000");
+        //string GetDataUrl = string.Format("http://172.100.100.170:8080/qpe/getTagPosition?version=2&coord={0}&maxAge=80000",coordsystemTemp);
         using (UnityWebRequest www = UnityWebRequest.Get(GetDataUrl))
         {
             yield return www.SendWebRequest();
