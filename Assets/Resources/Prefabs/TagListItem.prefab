@@ -265,7 +265,7 @@ GameObject:
   - component: {fileID: 2912799215075647731}
   - component: {fileID: 2912799215075647730}
   m_Layer: 5
-  m_Name: Window Contents
+  m_Name: TagListItem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

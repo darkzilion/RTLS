@@ -5,6 +5,7 @@ using LitJson;
 using UnityEngine.Networking;
 using System;
 using System.Threading;
+using UnityEngine.UI;
 
 public class Tag : MonoBehaviour
 {
@@ -23,6 +24,9 @@ public class Tag : MonoBehaviour
     List<string> CoordList; // Array로 변환하기 위한 리스트, 동적 Append를 위함(C#은 Array append가 안됨)
     public string coordsystem = "TempA"; // 첫 실행 시 LoadMap을 하기 위한 Trick
     public string coordsystemBefore = "TempB"; // 층 변환 시 이전 층과 바뀐 층 정보를 비교해서 바뀌였다면 바뀐 층으로 LoadMap을 새로 진행
+
+    public GameObject TagListItem; // 리스트에 추가 되는 Tag 정보 Object
+    public GameObject TagListContent; // Tag 정보가 추가 될 List UI
 
     struct TagStruct // 각 Tag의 정보를 담을 Struct
     {
@@ -250,6 +254,7 @@ public class Tag : MonoBehaviour
                 tag.transform.parent = transform; //TagDrawer gameObject에 child로 지정
                 tag.name = item.Key; // tag name 
                 tag.GetComponent<SpriteRenderer>().color = item.Value.color; // tag에 설정된 색으로 색 변경
+                TagListUICreate(item.Value);
                 //Debug.Log("GOT CHAA2");
             }
             //Debug.LogFormat("{0}: {1}", item.Key, item.Value.LastTime);
@@ -293,5 +298,19 @@ public class Tag : MonoBehaviour
     public void CoordChange(int index)
     {
         coordsystem = CoordArray[index];
+    }
+
+    private void TagListUICreate(TagStruct TagPositionInfo)
+    {
+        //Dictionary<string, TagStruct> TempTagDicttt = new Dictionary<string, TagStruct>(CoordTagDict[coordsystem]);
+        GameObject tagInfo = Instantiate(TagListItem, TagListContent.transform);
+        string tagName = TagPositionInfo.name;
+        tagInfo.name = tagName;
+        GameObject tagHeaderText = tagInfo.transform.GetChild(0).GetChild(2).gameObject;
+        tagHeaderText.GetComponent<Text>().text = tagName;
+        //print(tagListItem.name);
+        //GameObject tagHeaderText = GameObject.Find(tagName).transform.Find("Header").transform.Find("Text").gameObject;
+        //GameObject tagHeaderText = GameObject.Find(tagName).transform.Find("Header").transform.Find("Text").gameObject;
+        //tagHeaderText.GetComponent<Text>().text = tagName;
     }
 }
