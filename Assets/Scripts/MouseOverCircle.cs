@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class MouseOver : MonoBehaviour
 {
-    GameObject parent;
-
     private void OnMouseEnter()
     {
         gameObject.GetComponent<Transform>().localScale = new Vector3(0.5f, 0.5f);
