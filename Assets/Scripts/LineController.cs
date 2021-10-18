@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using UnityEngine.Networking;
 using Newtonsoft.Json; //Json encoding을 위한 모듈
+using UnityEngine.EventSystems; // 다른 UI 클릭 시 작동 안되게끔 
 
 // Zone 생성 버튼 클릭 시 Line Prefab을 통해 Zone gameobject가 새로 생성됨
 // Prefab에 이 Script가 미리 포함되어 있음
@@ -60,10 +61,14 @@ public class LineController : MonoBehaviour
         // 마우스 버튼 누를 시 해당 위치에 원을 만들고 해당 좌표를 Line의 꼭지점으로 보냄
         if (Input.GetMouseButtonDown(0)) // 클릭 시
         {
-            mousePosition = cm.ScreenToWorldPoint(Input.mousePosition); // 클릭 시점의 마우스 포지션 저장
-            _SetPosition(); // line renderer에 클릭 시점의 마우스 포지션을 라인 꼭지점으로 전달
-            createCircle(); // 클릭 지점에 원을 만듬
-            castRay(); // 클릭 지점에 레이저 광선을 쏜 후 레이저 광선에 걸리는 Collider(충돌체)를 식별하여 함수 실행
+            if (!EventSystem.current.IsPointerOverGameObject()) // 다른 UI 클릭 시 작동 안되게끔 
+            {
+                mousePosition = cm.ScreenToWorldPoint(Input.mousePosition); // 클릭 시점의 마우스 포지션 저장
+                _SetPosition(); // line renderer에 클릭 시점의 마우스 포지션을 라인 꼭지점으로 전달
+                createCircle(); // 클릭 지점에 원을 만듬
+                castRay(); // 클릭 지점에 레이저 광선을 쏜 후 레이저 광선에 걸리는 Collider(충돌체)를 식별하여 함수 실행
+            }
+
         }
     }
 
