@@ -268,7 +268,7 @@ public class Tag : MonoBehaviour
     // Tag position 정보가 1분간 갱신 안되면 화면에서 지우기 위한 함수
     IEnumerator TagDelete()
     {
-        Dictionary<string, TagStruct> TempTagDictt = new Dictionary<string, TagStruct>(CoordTagDict[coordsystem]); // 현재 Coord의 TagDict를 새로 생성
+        Dictionary<string, TagStruct> TempTagDictt = new Dictionary<string, TagStruct>(CoordTagDict[coordsystem]); // 현재 Coord의 TagDict를 새로 생성, 문제 있음 변경 필요(아무것도 없을 때 삭제하면 에러남)
         //Debug.Log("5sec"); 
         DateTime currentTime = DateTime.Now; 
         DateTime oneMinBefore = currentTime.AddMinutes(-1); //현재 시각 기준 1분 전

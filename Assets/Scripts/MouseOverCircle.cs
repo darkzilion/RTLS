@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MouseOver : MonoBehaviour
+public class MouseOverCircle : MonoBehaviour
 {
     private void OnMouseEnter()
     {
