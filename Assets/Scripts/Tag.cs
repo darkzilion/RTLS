@@ -22,8 +22,8 @@ public class Tag : MonoBehaviour
 
     string[] CoordArray; // CoordSystem 이름(층 이름)을 담을 어레이
     List<string> CoordList; // Array로 변환하기 위한 리스트, 동적 Append를 위함(C#은 Array append가 안됨)
-    public string coordsystem = "TempA"; // 첫 실행 시 LoadMap을 하기 위한 Trick
-    public string coordsystemBefore = "TempB"; // 층 변환 시 이전 층과 바뀐 층 정보를 비교해서 바뀌였다면 바뀐 층으로 LoadMap을 새로 진행
+    private string coordsystem = "TempA"; // 첫 실행 시 LoadMap을 하기 위한 Trick
+    private string coordsystemBefore = "TempB"; // 층 변환 시 이전 층과 바뀐 층 정보를 비교해서 바뀌였다면 바뀐 층으로 LoadMap을 새로 진행
 
     public GameObject TagListItem; // 리스트에 추가 되는 Tag 정보 Object
     public GameObject TagListContent; // Tag 정보가 추가 될 List UI
@@ -38,7 +38,8 @@ public class Tag : MonoBehaviour
         public float smoothedPositionAccuracy;
         public string zones;
         public long positionTS;
-
+        public string deviceAddress;
+        public string id;
     }
 
     //float GrowSpeed = 1.0f;
@@ -198,9 +199,18 @@ public class Tag : MonoBehaviour
             TagPositionInfo.coordinateSystemName = TagInfo["tags"][i]["coordinateSystemName"].ToString(); 
             TagPositionInfo.smoothedPosition = new Vector3(float.Parse(TagInfo["tags"][i]["smoothedPosition"][0].ToString()), float.Parse(TagInfo["tags"][i]["smoothedPosition"][1].ToString())); 
             TagPositionInfo.smoothedPositionAccuracy = float.Parse(TagInfo["tags"][i]["smoothedPositionAccuracy"].ToString());
-            TagPositionInfo.zones = TagInfo["tags"][i]["zones"].ToString();
+
+            if (TagInfo["tags"][i]["zones"].Count > 0)
+            {
+                TagPositionInfo.zones = TagInfo["tags"][i]["zones"][0]["name"].ToString();
+            } else
+            {
+                TagPositionInfo.zones = "";
+            }
             TagPositionInfo.LastTime = NowTime;
             TagPositionInfo.positionTS = long.Parse(TagInfo["tags"][i]["positionTS"].ToString());
+            TagPositionInfo.deviceAddress = TagInfo["tags"][i]["deviceAddress"].ToString();
+            TagPositionInfo.id = TagInfo["tags"][i]["id"].ToString();
 
             // 맵 이동되면 Tag를 삭제 하기 위함
             foreach (string item in CoordArray)
@@ -308,6 +318,16 @@ public class Tag : MonoBehaviour
         tagInfo.name = tagName;
         GameObject tagHeaderText = tagInfo.transform.GetChild(0).GetChild(2).gameObject;
         tagHeaderText.GetComponent<Text>().text = tagName;
+        GameObject tagBodyText = tagInfo.transform.GetChild(1).gameObject;
+        tagBodyText.transform.GetChild(0).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.id;
+        tagBodyText.transform.GetChild(1).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.id;
+        tagBodyText.transform.GetChild(2).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.coordinateSystemName;
+        tagBodyText.transform.GetChild(3).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.smoothedPosition.ToString();
+        tagBodyText.transform.GetChild(4).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.smoothedPositionAccuracy.ToString();
+        tagBodyText.transform.GetChild(5).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.zones;
+        tagBodyText.transform.GetChild(6).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.positionTS.ToString();
+        tagBodyText.transform.GetChild(7).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.deviceAddress;
+        tagBodyText.transform.GetChild(8).GetChild(1).gameObject.GetComponent<Text>().text = ColorUtility.ToHtmlStringRGBA(TagPositionInfo.color);
         //print(tagListItem.name);
         //GameObject tagHeaderText = GameObject.Find(tagName).transform.Find("Header").transform.Find("Text").gameObject;
         //GameObject tagHeaderText = GameObject.Find(tagName).transform.Find("Header").transform.Find("Text").gameObject;
