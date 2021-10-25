@@ -22,7 +22,7 @@ public class MakeButton : MonoBehaviour
 
     private void OnGUI()
     {
-        if (GUI.Button(new Rect(800, 400, 80, 20), "button"))
+        if (GUI.Button(new Rect(10, 70, 120, 30), "Add test tag"))
         {
             GameObject tag = Instantiate(tagPrefab, list.transform);
             string tagNum = tag.transform.GetSiblingIndex().ToString();
@@ -30,12 +30,12 @@ public class MakeButton : MonoBehaviour
             GameObject tagHeaderText = GameObject.Find(tagNum).transform.Find("Header").transform.Find("Text").gameObject;
             tagHeaderText.GetComponent<Text>().text = string.Format("{0}th Tag", tagNum);
             int textNum = GameObject.Find(tagNum).transform.Find("Body").transform.childCount;
-            GameObject bodyText;
-            for (int i = 0; i < textNum; i++)
-            {
-                bodyText = GameObject.Find(tagNum).transform.Find("Body").transform.GetChild(i).gameObject;
-                bodyText.GetComponent<Text>().text = string.Format("{0}th Tag Info", i);
-            }
+            //GameObject bodyText;
+            //for (int i = 0; i < textNum; i++)
+            //{
+            //    bodyText = GameObject.Find(tagNum).transform.Find("Body").transform.GetChild(i).gameObject;
+            //    bodyText.GetComponent<Text>().text = string.Format("{0}th Tag Info", i);
+            //}
         }
     }
 }
