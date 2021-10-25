@@ -49,17 +49,28 @@ public class CamaraControl : MonoBehaviour
             }
         }
 
-        
-
-        if (Input.GetMouseButton(0)) // 마우스 버튼이 계속 눌려 있을 시
+        if (!Input.GetMouseButton(0))
         {
-            if (!EventSystem.current.IsPointerOverGameObject()) //UI 클릭시 false
-            {
-                Vector3 difference = dragOrigin - Cam.ScreenToWorldPoint(Input.mousePosition); // 클릭 시 포지션에서 현재 위치의 차이 저장
-                Cam.transform.position += difference; // 카메라 포지션을 차이 만큼 이동, 반대로 이동해야 정상임
-            }
+            return;
         }
-        ClampCamera(Cam.transform.position); // 카메라가 이동할 수 있는 위치 제한
+
+        if (!EventSystem.current.IsPointerOverGameObject())
+        {
+            Vector3 difference = dragOrigin - Cam.ScreenToWorldPoint(Input.mousePosition);
+            Cam.transform.position += difference;
+            ClampCamera(Cam.transform.position);
+
+        }
+
+        //if (Input.GetMouseButton(0)) // 마우스 버튼이 계속 눌려 있을 시
+        //{
+        //    if (!EventSystem.current.IsPointerOverGameObject()) //UI 클릭시 false
+        //    {
+        //        Vector3 difference = dragOrigin - Cam.ScreenToWorldPoint(Input.mousePosition); // 클릭 시 포지션에서 현재 위치의 차이 저장
+        //        Cam.transform.position += difference; // 카메라 포지션을 차이 만큼 이동, 반대로 이동해야 정상임
+        //    }
+        //}
+        //ClampCamera(Cam.transform.position); // 카메라가 이동할 수 있는 위치 제한
     }
 
     void Zoom() // 카메라 줌인, 줌아웃
