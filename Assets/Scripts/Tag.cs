@@ -7,6 +7,10 @@ using System;
 using System.Threading;
 using UnityEngine.UI;
 
+// 태그 Position Info 질의
+// 맵에 태그 생성, timeout 시 삭제
+// 좌측 패널에 태그 리스팅
+// 태그 마우스오버 시 이름 표시
 public class Tag : MonoBehaviour
 {
     public GameObject prefab; // Tag Prefab
@@ -40,6 +44,7 @@ public class Tag : MonoBehaviour
         public long positionTS;
         public string deviceAddress;
         public string id;
+        public string timeGap;
     }
 
     //float GrowSpeed = 1.0f;
@@ -83,6 +88,7 @@ public class Tag : MonoBehaviour
                     if (jsonResult == "")
                     {
                         Debug.Log("Tag Info API Result is empty");
+                        yield break;
                     }
 
                     JsonData projectInfo = JsonMapper.ToObject(jsonResult);
@@ -127,6 +133,7 @@ public class Tag : MonoBehaviour
             for (int i = childs - 1; i >= 0; i--) // 차일드의 순서는 0부터 시작하기에, 현재 태그 총 숫자에서 -1을 함
             {
                 GameObject.Destroy(transform.GetChild(i).gameObject);
+                GameObject.Destroy(TagListContent.transform.GetChild(i).gameObject);
             }
 
         }
@@ -150,8 +157,9 @@ public class Tag : MonoBehaviour
                     if (jsonResult == "")
                     {
                         Debug.Log("Tag Info API Result is empty");
+                        yield break;
                     }
-                    InitData(jsonResult);
+                    InitData(jsonResult); //향후 yeild StartCorouine(InitData(jsonResult)로 바꿔야 할 수도,,,
                 }
             }
         }
@@ -212,7 +220,11 @@ public class Tag : MonoBehaviour
             TagPositionInfo.deviceAddress = TagInfo["tags"][i]["deviceAddress"].ToString();
             TagPositionInfo.id = TagInfo["tags"][i]["id"].ToString();
 
-            // 맵 이동되면 Tag를 삭제 하기 위함
+            long timeNow = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            TagPositionInfo.timeGap = DateTimeOffset.FromUnixTimeMilliseconds(timeNow - TagPositionInfo.positionTS).DateTime.ToString("mm:ss");
+            print(TagPositionInfo.timeGap);
+
+            // 맵 이동되면 Tag를 삭제 하기 위함, InitData에서 분리가 필요할 수 있음
             foreach (string item in CoordArray)
             {
                 if (CoordTagDict[item].ContainsKey(TagID)) // 이미 저장된 Tag정보가 있고,
@@ -248,15 +260,12 @@ public class Tag : MonoBehaviour
         Dictionary<string, TagStruct> TempTagDict = new Dictionary<string, TagStruct>(CoordTagDict[coordsystem]); // 현재 Coord의 TagDict를 새로 생성
         foreach (KeyValuePair<string, TagStruct> item in TempTagDict)
         {
-            //Debug.LogFormat("{0}:, {1}, {2}, {3}", item.Key, float.Parse(item.Value["smoothedPosition"][0].ToString()), float.Parse(item.Value["smoothedPosition"][1].ToString()), float.Parse(item.Value["smoothedPosition"][2].ToString()));
             Vector3 tagPosition = item.Value.smoothedPosition;
             if (null != GameObject.Find(item.Key)) // 태그 이름으로 검색했을 때 이미 GameObject가 있다면,
             {
                 GameObject tagg = GameObject.Find(item.Key);
                 tagg.GetComponent<Transform>().position = tagPosition; //Tag의 Position을 Dict 정보 기준으로 Update
-
-                //Debug.Log("GOT CHAA");
-
+                TagListUICreate(item.Value);
             }
             else // 없다면
             {
@@ -267,7 +276,6 @@ public class Tag : MonoBehaviour
                 TagListUICreate(item.Value);
                 //Debug.Log("GOT CHAA2");
             }
-            //Debug.LogFormat("{0}: {1}", item.Key, item.Value.LastTime);
         }
     }
 
@@ -298,6 +306,7 @@ public class Tag : MonoBehaviour
                 CoordTagDict[coordsystem].Remove(item.Key); // TagDict에서 삭제
                 GameObject tagg = GameObject.Find(item.Key); // 해당 Tag를 찾아서
                 Destroy(tagg); // 삭제
+                //Destroy(TagListContent.transform.Find(item.Key).GetChild(1).gameObject); //content 내 body만 삭제 시 나중에 다시 생성할 때 오류...
             }
         }
         yield return new WaitForSeconds(5); // 5초마다 돔
@@ -310,11 +319,20 @@ public class Tag : MonoBehaviour
         coordsystem = CoordArray[index];
     }
 
+    // Tag Info로 생성 된 태그 gameobject 먼저 찾은 뒤 없다면 Return
     private void TagListUICreate(TagStruct TagPositionInfo)
     {
-        //Dictionary<string, TagStruct> TempTagDicttt = new Dictionary<string, TagStruct>(CoordTagDict[coordsystem]);
-        GameObject tagInfo = Instantiate(TagListItem, TagListContent.transform);
         string tagName = TagPositionInfo.name;
+        GameObject tagInfo;
+
+        if (TagListContent.transform.Find(tagName) != null)
+        {
+            tagInfo = TagListContent.transform.Find(tagName).gameObject;
+        } else
+        {
+            tagInfo = Instantiate(TagListItem, TagListContent.transform);
+        }
+
         tagInfo.name = tagName;
         GameObject tagHeaderText = tagInfo.transform.GetChild(0).GetChild(2).gameObject;
         tagHeaderText.GetComponent<Text>().text = tagName;
@@ -322,12 +340,11 @@ public class Tag : MonoBehaviour
         tagBodyText.transform.GetChild(0).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.id;
         tagBodyText.transform.GetChild(1).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.id;
         tagBodyText.transform.GetChild(2).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.coordinateSystemName;
-        tagBodyText.transform.GetChild(3).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.smoothedPosition.ToString();
+        tagBodyText.transform.GetChild(3).GetChild(1).gameObject.GetComponent<Text>().text = string.Format("{0} ({1}s ago)", TagPositionInfo.smoothedPosition.ToString(), TagPositionInfo.timeGap);
         tagBodyText.transform.GetChild(4).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.smoothedPositionAccuracy.ToString();
         tagBodyText.transform.GetChild(5).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.zones;
-        tagBodyText.transform.GetChild(6).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.positionTS.ToString();
-        tagBodyText.transform.GetChild(7).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.deviceAddress;
-        tagBodyText.transform.GetChild(8).GetChild(1).gameObject.GetComponent<Text>().text = ColorUtility.ToHtmlStringRGBA(TagPositionInfo.color);
+        tagBodyText.transform.GetChild(6).GetChild(1).gameObject.GetComponent<Text>().text = TagPositionInfo.deviceAddress;
+        tagBodyText.transform.GetChild(7).GetChild(1).gameObject.GetComponent<Text>().text = ColorUtility.ToHtmlStringRGBA(TagPositionInfo.color);
         //print(tagListItem.name);
         //GameObject tagHeaderText = GameObject.Find(tagName).transform.Find("Header").transform.Find("Text").gameObject;
         //GameObject tagHeaderText = GameObject.Find(tagName).transform.Find("Header").transform.Find("Text").gameObject;
