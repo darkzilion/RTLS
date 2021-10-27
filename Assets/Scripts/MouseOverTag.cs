@@ -48,13 +48,16 @@ public class MouseOverTag : MonoBehaviour
 
     private void Update()
     {
+        if (tagText != null)
+        {
+            tagText.transform.localPosition = canvasPos;
+            offsetPosY = transform.position.y + 0.6f;
+            offsetPos = new Vector3(transform.position.x, offsetPosY, transform.position.z);
+            screenPoint = Camera.main.WorldToScreenPoint(offsetPos);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPoint, null, out canvasPos);
+            tagText.transform.localPosition = canvasPos;
+        }
 
-        tagText.transform.localPosition = canvasPos;
-        offsetPosY = transform.position.y + 0.6f;
-        offsetPos = new Vector3(transform.position.x, offsetPosY, transform.position.z);
-        screenPoint = Camera.main.WorldToScreenPoint(offsetPos);
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPoint, null, out canvasPos);
-        tagText.transform.localPosition = canvasPos;
     }
 
     private void OnMouseEnter()
