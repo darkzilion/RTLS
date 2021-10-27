@@ -32,6 +32,8 @@ public class Tag : MonoBehaviour
     public GameObject TagListItem; // 리스트에 추가 되는 Tag 정보 Object
     public GameObject TagListContent; // Tag 정보가 추가 될 List UI
 
+    public InputField TagInputField; // 태그 검색 시 사용되는 input field
+
     struct TagStruct // 각 Tag의 정보를 담을 Struct
     {
         public string name;
@@ -60,6 +62,10 @@ public class Tag : MonoBehaviour
     {
         Thread.Sleep(2000); //2초 후에
         StartCoroutine(TagDelete()); //포지션 업데이트가 없는 Tag 삭제
+        TagInputField.onValueChanged.AddListener(delegate
+        {
+            TagSearch(TagInputField);
+        });
     }
 
     void Update()
@@ -222,7 +228,6 @@ public class Tag : MonoBehaviour
 
             long timeNow = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             TagPositionInfo.timeGap = DateTimeOffset.FromUnixTimeMilliseconds(timeNow - TagPositionInfo.positionTS).DateTime.ToString("mm:ss");
-            print(TagPositionInfo.timeGap);
 
             // 맵 이동되면 Tag를 삭제 하기 위함, InitData에서 분리가 필요할 수 있음
             foreach (string item in CoordArray)
@@ -349,5 +354,23 @@ public class Tag : MonoBehaviour
         //GameObject tagHeaderText = GameObject.Find(tagName).transform.Find("Header").transform.Find("Text").gameObject;
         //GameObject tagHeaderText = GameObject.Find(tagName).transform.Find("Header").transform.Find("Text").gameObject;
         //tagHeaderText.GetComponent<Text>().text = tagName;
+    }
+
+    public void TagSearch(InputField thisInputfield)
+    {
+        print("Gotta");
+        int tagCount = TagListContent.transform.childCount;
+        print(tagCount);
+        for (int i = 0; i < tagCount; i++)
+        {
+
+            GameObject TagListItem = TagListContent.transform.GetChild(i).gameObject;
+            TagListItem.SetActive(false);
+            if (TagListItem.name.Contains(thisInputfield.text))
+            {
+                TagListItem.SetActive(true);
+            }
+        }
+
     }
 }
