@@ -358,10 +358,9 @@ public class Tag : MonoBehaviour
 
     public void TagSearch(InputField thisInputfield)
     {
-        print("Gotta");
-        int tagCount = TagListContent.transform.childCount;
-        print(tagCount);
-        for (int i = 0; i < tagCount; i++)
+        int tagListCount = TagListContent.transform.childCount;
+        int tagCount = transform.childCount;
+        for (int i = 0; i < tagListCount; i++)
         {
 
             GameObject TagListItem = TagListContent.transform.GetChild(i).gameObject;
@@ -371,6 +370,14 @@ public class Tag : MonoBehaviour
                 TagListItem.SetActive(true);
             }
         }
-
+        for (int i = 0; i < tagCount; i++)
+        {
+            GameObject TagItem = transform.GetChild(i).gameObject;
+            TagItem.SetActive(false);
+            if (TagItem.name.Contains(thisInputfield.text))
+            {
+                TagItem.SetActive(true);
+            }
+        }
     }
 }
