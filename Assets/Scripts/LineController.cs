@@ -32,6 +32,7 @@ public class LineController : MonoBehaviour
     private Vector2 mousePosition; //mouse position을 담을 변수
     private Vector3[] Vector3PostionArray; //line renderer로 그린 zone의 position을 저장하기 위한 array
     private Vector2[] positionArray; //collider를 그리기 위해 필요한 Vector2 position array
+    private Color LineColor;
 
     // Start is called before the first frame update
     void Start()
@@ -39,7 +40,11 @@ public class LineController : MonoBehaviour
         cm = Camera.main; //main 카메라를 담음
         lr = GetComponent<LineRenderer>(); //gameObject 내에 LineRenderer Component를 찾음
         lr.positionCount = 0; //LineRenderer내 Default로 정의된 꼭지점을 삭제 (디폴트는 1개)
-        lr.SetWidth(0.011f, 0.011f); //Line의 굵기 정의
+        lr.SetWidth(0.05f, 0.05f); //Line의 굵기 정의
+        LineColor = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+        lr.startColor = LineColor;
+        lr.endColor = LineColor;
+
     }
 
     // Sample button
