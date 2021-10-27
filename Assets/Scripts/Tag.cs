@@ -261,9 +261,9 @@ public class Tag : MonoBehaviour
         foreach (KeyValuePair<string, TagStruct> item in TempTagDict)
         {
             Vector3 tagPosition = item.Value.smoothedPosition;
-            if (null != GameObject.Find(item.Key)) // 태그 이름으로 검색했을 때 이미 GameObject가 있다면,
+            if (null != transform.Find(item.Key)) // 태그 이름으로 검색했을 때 이미 GameObject가 있다면,
             {
-                GameObject tagg = GameObject.Find(item.Key);
+                GameObject tagg = transform.Find(item.Key).gameObject;
                 tagg.GetComponent<Transform>().position = tagPosition; //Tag의 Position을 Dict 정보 기준으로 Update
                 TagListUICreate(item.Value);
             }
