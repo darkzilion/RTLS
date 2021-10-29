@@ -141,3 +141,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   circlePrefab: {fileID: 1541505447988321163, guid: 54142da32fb324e5d947f2f859ff8bb6, type: 3}
+  polyPrefab: {fileID: 6501958622485081753, guid: 63dd970cca64842a8ba76e62df915ef3, type: 3}

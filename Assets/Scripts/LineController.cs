@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using UnityEngine.Networking;
 using Newtonsoft.Json; //Json encoding을 위한 모듈
-using UnityEngine.EventSystems; // 다른 UI 클릭 시 작동 안되게끔 
+using UnityEngine.EventSystems; // 다른 UI 클릭 시 작동 안되게끔
 
 // Zone 생성 버튼 클릭 시 Line Prefab을 통해 Zone gameobject가 새로 생성됨
 // Prefab에 이 Script가 미리 포함되어 있음
@@ -26,6 +26,7 @@ public class LineController : MonoBehaviour
 
 
     public GameObject circlePrefab; //마우스 클릭시 찍히는 원을 prefab으로 받음(import 한다고 생각하면 됨)
+    public GameObject polyPrefab; //Zone 도형 내부 색깔 Gameobject
 
     private Camera cm; //마우스 클릭시 좌표를 받기 위해 사용되는 Main Camera
     private LineRenderer lr; //실제 Line을 그려주는 LineRenderer Component zone 게임 오브젝트마다 생성됨
@@ -33,6 +34,8 @@ public class LineController : MonoBehaviour
     private Vector3[] Vector3PostionArray; //line renderer로 그린 zone의 position을 저장하기 위한 array
     private Vector2[] positionArray; //collider를 그리기 위해 필요한 Vector2 position array
     private Color LineColor;
+    private GameObject zonePolygon;
+    private Shapes2D.Shape zonePolygonShape;
 
     // Start is called before the first frame update
     void Start()
@@ -126,6 +129,7 @@ public class LineController : MonoBehaviour
                     addCollider(); // 도형에 충돌체를 추가함, 향 후 Zone 도형에 들어온 Tag를 처리하기 위함
                     gameObject.GetComponent<LineController>().enabled = false; // Zone 도형 생성이 끝났으므로, 코드를 비활성화 시킴
                     StartCoroutine(PostZoneInfo()); // Zone의 꼭지점 정보를 API를 통해 외부로 전송
+                    createZonePolygon();
                 }
             }
         }
@@ -166,7 +170,7 @@ public class LineController : MonoBehaviour
 
     // 꼭지점 정보를 담은 Vector3 어레이를 Json Object로 전달하기 위해 리스트로 변경하는 함수
     List<List<float>> ConvertPureList(Vector3[] v)
-   {
+    {
         List<List<float>> _v = new List<List<float>>();
    
        for (int i = 0; i < v.Length; i++)
@@ -174,7 +178,18 @@ public class LineController : MonoBehaviour
             _v.Add(new List<float>() { v[i].x, v[i].y, v[i].z });
        }
        return _v;
-   }
+    }
+
+    Vector2[] ConvertVector2ListDivide(Vector3[] v3)
+    {
+        Vector2[] v2 = new Vector2[v3.Length];
+        for (int i = 0; i < v3.Length; i++)
+        {
+            Vector3 tempV3 = v3[i];
+            v2[i] = new Vector2(tempV3.x, tempV3.y) / 100f;
+        }
+        return v2;
+    }
 
 
     // Zone의 이름 및 꼭지점 정보를 Post, Zone생성 시 이름 추가 필요, 현재 default 이름 사용
@@ -222,6 +237,19 @@ public class LineController : MonoBehaviour
                 }
             }
         }
+    }
+
+    // Zone 안쪽 색칠 함수
+    private void createZonePolygon()
+    {
+        zonePolygon = Instantiate(polyPrefab, new Vector3(0f, 0f), Quaternion.identity);
+        zonePolygonShape = zonePolygon.GetComponent<Shapes2D.Shape>();
+        Vector2[] polyPositionArray = ConvertVector2ListDivide(Vector3PostionArray);
+        zonePolygonShape.settings.polyVertices = polyPositionArray;
+        zonePolygon.transform.localScale = new Vector3(100f, 100f, 1f);
+        Color zoneColor = LineColor;
+        zoneColor.a = 0.2f;
+        zonePolygonShape.settings.fillColor = zoneColor;
     }
 
     //Raycast를 그려주는 안내선
