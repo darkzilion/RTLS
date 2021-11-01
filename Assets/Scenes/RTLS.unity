@@ -564,7 +564,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1524837060009576099, guid: 8856af513dc2b0442b25fba2501ec677, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.0000076293945
+      value: -0.000017166138
       objectReference: {fileID: 0}
     - target: {fileID: 1524837060233869157, guid: 8856af513dc2b0442b25fba2501ec677, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -3968,6 +3968,49 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 988012536}
   m_CullTransparentMesh: 0
+--- !u!1 &1005386750
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1005386752}
+  - component: {fileID: 1005386751}
+  m_Layer: 0
+  m_Name: ZoneController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1005386751
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1005386750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00355ffc833e840248382e23786686e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1005386752
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1005386750}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.15577036, y: 0.08383149, z: -2295.9492}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1013479673
 GameObject:
   m_ObjectHideFlags: 0

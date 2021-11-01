@@ -24,7 +24,6 @@ public class LineController : MonoBehaviour
         }
     }
 
-
     public GameObject circlePrefab; //마우스 클릭시 찍히는 원을 prefab으로 받음(import 한다고 생각하면 됨)
     public GameObject polyPrefab; //Zone 도형 내부 색깔 Gameobject
 
@@ -36,10 +35,16 @@ public class LineController : MonoBehaviour
     private Color LineColor;
     private GameObject zonePolygon;
     private Shapes2D.Shape zonePolygonShape;
+    private GameObject ZoneController;
+    private string zoneName;
 
     // Start is called before the first frame update
     void Start()
     {
+        ZoneController = GameObject.Find("ZoneController");
+        gameObject.transform.SetParent(ZoneController.transform);
+        zoneName = "test" + gameObject.transform.GetSiblingIndex().ToString();
+        gameObject.name = zoneName + "_zone";
         cm = Camera.main; //main 카메라를 담음
         lr = GetComponent<LineRenderer>(); //gameObject 내에 LineRenderer Component를 찾음
         lr.positionCount = 0; //LineRenderer내 Default로 정의된 꼭지점을 삭제 (디폴트는 1개)
@@ -250,6 +255,9 @@ public class LineController : MonoBehaviour
         Color zoneColor = LineColor;
         zoneColor.a = 0.2f;
         zonePolygonShape.settings.fillColor = zoneColor;
+        zonePolygon.name = zoneName + "_poly";
+        zonePolygon.transform.SetParent(ZoneController.transform);
+        zonePolygon.tag = "CoordSys001";
     }
 
     //Raycast를 그려주는 안내선
